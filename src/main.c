@@ -83,7 +83,7 @@ int main(int argc, char *const *argv)
         }
         else {
             habits_save();
-            printf("The habit '%s' with quantity %d has been added\n", name, 
+            printf("The habit '%s' with quantity %lu has been added\n", name,
                 quantity);
         }
     }
@@ -143,7 +143,7 @@ int main(int argc, char *const *argv)
         }
         else {
             if (activities_add(command_arg, quantity))
-                printf("Added %d times to habit '%s' for today\n", quantity, 
+                printf("Added %lu times to habit '%s' for today\n", quantity,
                     command_arg);
             else
                 puts("Something went wrong");

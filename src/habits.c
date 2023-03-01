@@ -76,6 +76,8 @@ int habits_load()
         free(line);
 
     fclose(f);
+
+    return 1;
 }
 
 int habits_save()
@@ -88,7 +90,7 @@ int habits_save()
 
     struct habit *h = (struct habit *)habits;
     while (h != NULL) {
-        fprintf(f, "%s,%u\n", h->name, h->quantity);
+        fprintf(f, "%s,%lu\n", h->name, h->quantity);
         h = (struct habit *)h->llist.next;
     }
 

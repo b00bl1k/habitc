@@ -118,7 +118,7 @@ int activities_add(const char *name, unsigned long int quantity)
     if (!f)
         return 0;
 
-    fprintf(f, "%s,%s,%u\n", ts, name, quantity);
+    fprintf(f, "%s,%s,%lu\n", ts, name, quantity);
     fclose(f);
 
     return 1;
