@@ -29,6 +29,7 @@
 #include <stdio.h>
 
 #include "activities.h"
+#include "commands.h"
 #include "habits.h"
 #include "utils.h"
 
@@ -68,86 +69,28 @@ int main(int argc, char *const *argv)
     if (parse_opts(argc, argv))
         return 0;
 
-    if (app_command == CMD_NOT_SPECIFIED) {
-        usage();
-        return 0;
-    }
-
     habits_load();
 
-    if (app_command == CMD_ADD) {
-        char *name = strdup(command_arg);
-        if (!habits_add(name, quantity)) {
-            printf("Couldn't add a new '%s' habit\n", name);
-            free(name);
-        }
-        else {
-            habits_save();
-            printf("The habit '%s' with quantity %lu has been added\n", name,
-                quantity);
-        }
-    }
-    else if (app_command == CMD_DEL) {
-        struct habit *h = habits_find(command_arg);
+    switch (app_command) {
+    case CMD_NOT_SPECIFIED:
+        usage();
+        break;
 
-        if (!h) {
-            printf("The '%s' habit not found\n", command_arg);
-        }
-        else {
-            habits_remove(h);
-            habits_save();
-            printf("The habit '%s' has been deleted\n", command_arg);
-        }
-    }
-    else if (app_command == CMD_LIST) {
-        time_t now = time(NULL);
-        struct tm tm = *localtime(&now);
-        tm.tm_hour = 0;
-        tm.tm_min = 0;
-        tm.tm_sec = 0;
-        tm.tm_mday -= 6;
-        time_t min = mktime(&tm);
+    case CMD_ADD:
+        command_add(command_arg, quantity);
+        break;
 
-        activities_load(&min, &now, NULL);
+    case CMD_DEL:
+        command_del(command_arg);
+        break;
 
-        struct habit *h = (struct habit *)habits;
+    case CMD_LIST:
+        command_list();
+        break;
 
-        while (h != NULL) {
-            int pad = habits_name_len_max +
-                (strlen(h->name) - u_utf8_strlen(h->name));
-            printf("% *s: ", pad, h->name);
-            struct tm dt = *localtime(&now);
-            for (int day = 0; day < 7; day++) {
-                struct activity *act = activity_find(&dt, h);
-                if (!act)
-                    printf("\u2B1A ");
-                else if (act->quantity < h->quantity)
-                    printf("\u2B13 ");
-                else
-                    printf("\u25A0 ");
-
-                dt.tm_mday--;
-                mktime(&dt);
-            }
-            putchar('\n');
-            h = (struct habit *)h->llist.next;
-        }
-
-        activities_unload();
-    }
-    else if (app_command == CMD_LOG) {
-        struct habit *h = habits_find(command_arg);
-
-        if (!h) {
-            printf("The '%s' habit not found\n", command_arg);
-        }
-        else {
-            if (activities_add(command_arg, quantity))
-                printf("Added %lu times to habit '%s' for today\n", quantity,
-                    command_arg);
-            else
-                puts("Something went wrong");
-        }
+    case CMD_LOG:
+        command_log(command_arg, quantity);
+        break;
     }
 
     habits_free();
